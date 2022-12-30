@@ -5,6 +5,10 @@ variable "aws_access_key" {}
 
 variable "aws_secret_key" {}
 
+variable "deployment_environment" {
+  default = "DEV"
+}
+
 variable "region" {
   default = "us-east-2"
 }
@@ -20,6 +24,20 @@ variable "subnet1_cidr" {
 variable "environment_list" {
   type = list(string)
   default = ["DEV","QA","STAGE","PROD"]
+}
+
+variable "test" {
+  type = list(string)
+  default = ["DEV", "STAGE", "PROD"]
+}
+
+variable "test2" {
+  type = map(string)
+  default = {
+    "DEV" = "DEV"
+    "STAGE" = "STAGE"
+    "PROD" = "PROD"
+  }
 }
 
 variable "environment_map" {
@@ -141,12 +159,12 @@ resource "aws_security_group" "sg-nodejs-instance" {
 # INSTANCE
 resource "aws_instance" "nodejs1" {
   ami = data.aws_ami.aws-linux.id
-  instance_type = var.environment_instance_type["DEV"]
-  //instance_type = var.environment_instance_settings["PROD"].instance_type
+  //instance_type = var.environment_instance_type["DEV"]
+  instance_type = var.environment_instance_settings[var.deployment_environment].instance_type
   subnet_id = aws_subnet.subnet1.id
   vpc_security_group_ids = [aws_security_group.sg-nodejs-instance.id]
 
-  monitoring = var.environment_instance_settings["PROD"].monitoring
+  monitoring = var.environment_instance_settings[var.deployment_environment].monitoring
 
   tags = {Environment = var.environment_list[0]}
 
